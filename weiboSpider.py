@@ -629,7 +629,8 @@ class Weibo(object):
             is_original = self.is_original(info)
             if (not self.filter) or is_original:
                 weibo['id'] = info.xpath('@id')[0][2:]
-                weibo['publish_time'] = self.get_publish_time(info)  # 微博发布时间
+                weibo['publish_date'] = self.get_publish_time(info).split(' ')[0]  # 微博发布时间
+                weibo['concrete_time'] = self.get_publish_time(info).split(' ')[1]
                 weibo['original'] = "是" if is_original else "否"  # 是否原创微博
                 if(is_original):
                     weibo['retweet_reason'] = "无"
@@ -657,6 +658,7 @@ class Weibo(object):
                         weibo['retweet_pictures_numbers'] = len(weibo['retweet_pictures'].split(','))
                 weibo['video_url'] = self.get_video_url(info,
                                                         is_original)  # 微博视频url
+                weibo['exist_vedio'] = "有" if(len(weibo['video_url'])>3) else "无"  # 是否存在视频
                 weibo['publish_place'] = self.get_publish_place(info)  # 微博发布位置
                 weibo['publish_tool'] = self.get_publish_tool(info)  # 微博发布工具
                 footer = self.get_weibo_footer(info)
@@ -674,7 +676,7 @@ class Weibo(object):
         """打印一条微博"""
         print(weibo['content'])
         print(u'微博发布位置：%s' % weibo['publish_place'])
-        print(u'发布发布时间：%s' % weibo['publish_time'])
+        print(u'发布发布时间：%s' % (weibo['publish_date']+" "+ weibo['concrete_time']))
         print(u'发布发布工具：%s' % weibo['publish_tool'])
         print(u'点赞数：%d' % weibo['up_num'])
         print(u'转发数：%d' % weibo['retweet_num'])
@@ -703,7 +705,7 @@ class Weibo(object):
                     if weibo:
                         if weibo['id'] in self.weibo_id_list:
                             continue
-                        publish_time = self.str_to_time(weibo['publish_time'])
+                        publish_time = self.str_to_time((weibo['publish_date']+" "+ weibo['concrete_time']))
                         since_date = self.str_to_time(
                             self.user_config['since_date'])
                         if publish_time < since_date:
@@ -762,12 +764,14 @@ class Weibo(object):
         try:
             result_headers = [
                 '微博id',
-                '发布时间',
+                '发布日期',
+                '具体时间',
                 '微博导语',
                 '字数',
                 '原始图片url',
                 '原始图片数量',
                 '微博视频url',
+                '有无视频',
                 '发布位置',
                 '发布工具',
                 '点赞数',
@@ -775,11 +779,11 @@ class Weibo(object):
                 '评论数',
             ]
             if not self.filter:
-                result_headers.insert(2, '是否为原创微博')
-                result_headers.insert(3, '转发理由')
+                result_headers.insert(3, '是否为原创微博')
+                result_headers.insert(4, '转发理由')
                 result_headers.insert(4, '转发用户')
-                result_headers.insert(9, '被转发微博原始图片url')
-                result_headers.insert(10, '被转发微博原始图片数量')
+                result_headers.insert(10, '被转发微博原始图片url')
+                result_headers.insert(11, '被转发微博原始图片数量')
             result_data = [w.values() for w in self.weibo[wrote_num:]]
             if sys.version < '3':  # python2.x
                 reload(sys)
@@ -826,7 +830,7 @@ class Weibo(object):
                 temp_result.append(
                     str(wrote_num + i + 1) + ':' + w['content'] + '\n' +
                     u'微博位置: ' + w['publish_place'] + '\n' + u'发布时间: ' +
-                    w['publish_time'] + '\n' + u'点赞数: ' + str(w['up_num']) +
+                    w['publish_date'] + " "+ w['concrete_time'] + '\n' + u'点赞数: ' + str(w['up_num']) +
                     u'   转发数: ' + str(w['retweet_num']) + u'   评论数: ' +
                     str(w['comment_num']) + '\n' + u'发布工具: ' +
                     w['publish_tool'] + '\n\n')
