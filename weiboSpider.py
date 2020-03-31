@@ -630,19 +630,25 @@ class Weibo(object):
             is_original = self.is_original(info)
             if (not self.filter) or is_original:
                 weibo['id'] = info.xpath('@id')[0][2:]
+                weibo['publish_time'] = self.get_publish_time(info)  # 微博发布时间
+                weibo['original'] = is_original  # 是否原创微博
                 weibo['content'] = self.get_weibo_content(info,
                                                           is_original)  # 微博内容
+                weibo['content_size'] = len(weibo['content']) #正文字数
                 picture_urls = self.get_picture_urls(info, is_original)
                 weibo['original_pictures'] = picture_urls[
                     'original_pictures']  # 原创图片url
+                weibo['original_pictures_numbers'] = len(weibo['original_pictures'].split(','))
                 if not self.filter:
                     weibo['retweet_pictures'] = picture_urls[
                         'retweet_pictures']  # 转发图片url
-                    weibo['original'] = is_original  # 是否原创微博
+                    if(len(weibo['retweet_pictures']) < 5):
+                        weibo['retweet_pictures_numbers']=0
+                    else:
+                        weibo['retweet_pictures_numbers'] = len(weibo['retweet_pictures'].split(','))
                 weibo['video_url'] = self.get_video_url(info,
                                                         is_original)  # 微博视频url
                 weibo['publish_place'] = self.get_publish_place(info)  # 微博发布位置
-                weibo['publish_time'] = self.get_publish_time(info)  # 微博发布时间
                 weibo['publish_tool'] = self.get_publish_tool(info)  # 微博发布工具
                 footer = self.get_weibo_footer(info)
                 weibo['up_num'] = footer['up_num']  # 微博点赞数
@@ -747,19 +753,22 @@ class Weibo(object):
         try:
             result_headers = [
                 '微博id',
-                '微博正文',
+                '发布时间',
+                '微博导语',
+                '字数',
                 '原始图片url',
+                '原始图片数量',
                 '微博视频url',
                 '发布位置',
-                '发布时间',
                 '发布工具',
                 '点赞数',
                 '转发数',
                 '评论数',
             ]
             if not self.filter:
-                result_headers.insert(3, '被转发微博原始图片url')
-                result_headers.insert(4, '是否为原创微博')
+                result_headers.insert(6, '被转发微博原始图片url')
+                result_headers.insert(7, '被转发微博原始图片数量')
+                result_headers.insert(2, '是否为原创微博')
             result_data = [w.values() for w in self.weibo[wrote_num:]]
             if sys.version < '3':  # python2.x
                 reload(sys)

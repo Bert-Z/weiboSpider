@@ -1,11 +1,11 @@
 {
-	"user_id_list": ["1669879400"],
-    "filter": 1,
+	"user_id_list": ["FUDANAA"],
+    "filter": 0,
     "since_date": "2018-01-01",
     "write_mode": ["csv", "txt"],
-    "pic_download": 1,
-    "video_download": 1,
-    "cookie": "your cookie",
+    "pic_download": 0,
+    "video_download": 0,
+    "cookie": "SCF=Ajr1h6SmcEDBBtmwnQgewd_mxUEwoBRHYSEfkmMddfow34g7UYeUdNy9iCq1AOhDx_sMMkLORPiLUF1NMIi0m7s.; ALF=1586262708; _T_WM=18239039569; SUB=_2A25zhs4vDeRhGeBO6FYS8yzOyDqIHXVQiNJnrDV6PUJbkdAKLUujkW1NSge8xI27WAsdSby1KvK3EJyCfKEuGqhZ; SUHB=0OMkS7N5GHjPr0; SSOLoginState=1585626751; WEIBOCN_FROM=1110006030; MLOGIN=1; M_WEIBOCN_PARAMS=luicode%3D20000174%26uicode%3D20000174",
     "mysql_config": {
         "host": "localhost",
         "port": 3306,
