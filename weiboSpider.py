@@ -339,15 +339,14 @@ class Weibo(object):
             retweet_reason = self.handle_garbled(info.xpath('div')[-1])
             retweet_reason = retweet_reason[:retweet_reason.rindex(u'赞')]
             original_user = info.xpath("div/span[@class='cmt']/a/text()")
+
             if original_user:
                 original_user = original_user[0]
-                weibo_content = (retweet_reason + '\n' + u'原始用户: ' +
-                                 original_user + '\n' + u'转发内容: ' +
-                                 weibo_content)
+                ret= [retweet_reason,original_user,weibo_content]
             else:
-                weibo_content = (retweet_reason + '\n' + u'转发内容: ' +
-                                 weibo_content)
-            return weibo_content
+                ret= [retweet_reason,"无",weibo_content]
+
+            return ret
         except Exception as e:
             print('Error: ', e)
             traceback.print_exc()
@@ -631,14 +630,24 @@ class Weibo(object):
             if (not self.filter) or is_original:
                 weibo['id'] = info.xpath('@id')[0][2:]
                 weibo['publish_time'] = self.get_publish_time(info)  # 微博发布时间
-                weibo['original'] = is_original  # 是否原创微博
-                weibo['content'] = self.get_weibo_content(info,
-                                                          is_original)  # 微博内容
+                weibo['original'] = "是" if is_original else "否"  # 是否原创微博
+                if(is_original):
+                    weibo['retweet_reason'] = "无"
+                    weibo['original_user'] = "无"
+                    weibo['content'] = self.get_weibo_content(info, is_original)  # 微博内容
+                else:
+                    retw=self.get_weibo_content(info, is_original)
+                    weibo['retweet_reason'] = retw[0]
+                    weibo['original_user'] = retw[1]
+                    weibo['content'] = retw[2]
                 weibo['content_size'] = len(weibo['content']) #正文字数
                 picture_urls = self.get_picture_urls(info, is_original)
                 weibo['original_pictures'] = picture_urls[
                     'original_pictures']  # 原创图片url
-                weibo['original_pictures_numbers'] = len(weibo['original_pictures'].split(','))
+                if(len(weibo['original_pictures'])<3):
+                    weibo['original_pictures_numbers'] = 0
+                else:
+                    weibo['original_pictures_numbers'] = len(weibo['original_pictures'].split(',')) # 图片数量
                 if not self.filter:
                     weibo['retweet_pictures'] = picture_urls[
                         'retweet_pictures']  # 转发图片url
@@ -766,9 +775,11 @@ class Weibo(object):
                 '评论数',
             ]
             if not self.filter:
-                result_headers.insert(6, '被转发微博原始图片url')
-                result_headers.insert(7, '被转发微博原始图片数量')
                 result_headers.insert(2, '是否为原创微博')
+                result_headers.insert(3, '转发理由')
+                result_headers.insert(4, '转发用户')
+                result_headers.insert(9, '被转发微博原始图片url')
+                result_headers.insert(10, '被转发微博原始图片数量')
             result_data = [w.values() for w in self.weibo[wrote_num:]]
             if sys.version < '3':  # python2.x
                 reload(sys)
