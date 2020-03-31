@@ -778,6 +778,15 @@ class Weibo(object):
                 '转发数',
                 '评论数',
             ]
+
+            info_headers = [
+                '用户昵称',
+                '用户id',
+                '简介',
+                '微博数',
+                '关注数',
+                '粉丝数',
+            ]
             if not self.filter:
                 result_headers.insert(3, '是否为原创微博')
                 result_headers.insert(4, '转发理由')
@@ -785,9 +794,16 @@ class Weibo(object):
                 result_headers.insert(10, '被转发微博原始图片url')
                 result_headers.insert(11, '被转发微博原始图片数量')
             result_data = [w.values() for w in self.weibo[wrote_num:]]
+            info_data = [self.user['nickname'],self.user_config['user_id'],self.user['description'],self.user['weibo_num'],self.user['following'],self.user['followers']]
             if sys.version < '3':  # python2.x
                 reload(sys)
                 sys.setdefaultencoding('utf-8')
+                with open(self.get_filepath('csv'), 'ab') as g:
+                    g.write(codecs.BOM_UTF8)
+                    writer = csv.writer(g)
+                    if wrote_num == 0:
+                        writer.writerows([info_headers])
+                    writer.writerows([info_data])
                 with open(self.get_filepath('csv'), 'ab') as f:
                     f.write(codecs.BOM_UTF8)
                     writer = csv.writer(f)
